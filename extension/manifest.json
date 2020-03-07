@@ -1,0 +1,19 @@
+  {
+    "name": "Getting Started Example",
+    "version": "1.0",
+    "description": "Build an Extension!",
+    "permissions": ["declarativeContent", "storage", "tabs", "activeTab"],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+    "browser_action": {},
+    "content_scripts": [
+      {
+        "matches": ["*://*.ebay.com/sch/i.html*", "*://*.ebay.com/itm/*"],
+        "js": ["search.js", "jquery.js", "jquery.modal.js", "snackbar.min.js"],
+        "css":["search.css", "jquery.modal.css", "snackbar.min.css"]
+      }
+    ],
+    "manifest_version": 2
+  }

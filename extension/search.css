@@ -1,0 +1,59 @@
+.add-to-queue-btn {
+    background: #3665f3;
+    padding: 12px;
+    padding-left: 18px;
+    padding-right: 18px;
+    float: right;
+    color: #fafafa;
+}
+
+.add-to-queue-btn:hover {
+    cursor: pointer;
+    background: #526Fff;
+    padding: 12px;
+    padding-left: 18px;
+    padding-right: 18px;
+    float: right;
+    color: #fafafa;
+}
+
+.jquery-modal {
+    z-index: 999
+}
+
+.item-row {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.item-row>img {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    height: 100px;
+    width: 100px;
+    margin-bottom: 18px;
+    margin-top: 18px;
+}
+
+.item-title {
+    flex-grow: 1;
+    padding-left: 24px;
+}
+
+.add-group {
+    border: none;
+    font-size: 18px;
+    border-bottom:1px solid #757575;
+    padding:10px 10px 10px 5px;
+    flex-grow: 1;
+}
+
+.add-group:focus {
+    outline: none;
+}
+
+.add-group::placeholder {
+    font-style: italic;
+    color: rgba(0,0,0,0.3);
+  }
