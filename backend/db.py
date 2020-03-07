@@ -2,32 +2,15 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import json
 
-# this should be moved to main flask server
-# name = ""
-# password = ""
-# with open("config.json") as json_data_file:
-#     data = json.load(json_data_file)
-#     name = data["self"]["user"]
-#     password = data["self"]["passwd"]
-
-
-# client = MongoClient(
-#     "mongoself+srv://"
-#     + name
-#     + ":"
-#     + password
-#     + "@cluster0-u93bv.azure.mongoself.net/test?retryWrites=true&w=majority"
-# )
-# db = client.ebayBidQueue
-
 
 class BadDataException(Exception):
     pass
 
 
 class Atlas:
-    def __init__(self, url: str, database: str):
-        self.db = MongoClient(url)[database]
+    def __init__(self, url: str):
+        self.client = MongoClient(url)
+        self.db = self.client.ebayBidQueue
         self.user = self.db.user
         self.order = self.db.order
         self.queue = self.db.queue
@@ -50,7 +33,7 @@ class Atlas:
         return user
 
     # prob dont need
-    def updateUser(self, name, attributToUpdate, newValue):
+    def updateUser(self, _id: str, attributToUpdate, newValue):
         existing_user = self.user.find_one({"_id": ObjectId(_id)})
         # check if user exists
         if existing_user:
@@ -75,7 +58,7 @@ class Atlas:
             raise BadDataException("Not Found")
 
         for queue_id in existing_user["queues"]:
-            deleteQueue(email, queue_id)
+            self.deleteQueue(queue_id)
         self.user.delete_one({"_id": ObjectId(_id)})
 
     # creates an order with specified information
@@ -102,12 +85,13 @@ class Atlas:
             raise BadDataException("User not found")
 
         queue = self.queue.insert(
-            {"start": False, "orders": [], "max_bid": data["max_bid"],}
+            {"start": False, "orders": [], "max_bid": data["max_bid"], }
         )
         # adds the queueid to the array of queues each user has
         existing_user["queues"].append(queue["_id"])
         user = self.user.update(
-            {"_id": ObjectId(_id)}, {"$set": {"queues": existing_user["queues"]}},
+            {"_id": ObjectId(_id)}, {
+                "$set": {"queues": existing_user["queues"]}},
         )
         return user
 
@@ -125,7 +109,8 @@ class Atlas:
 
         # deletes the order and updates queue array of orders
         self.queue.update(
-            {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
+            {"_id": ObjectId(_id)}, {
+                "$set": {"orders": existing_queue["orders"]}}
         )
         self.deleteOrder(to_return)
 
@@ -136,10 +121,10 @@ class Atlas:
         existing_queue = self.queue.find_one({"_id": ObjectId(_id)})
         if not existing_queue:
             raise BadDataException("Queue not found")
-        newOrder = self.createOrder(order)
-        existing_queue["orders"].append(newOrder["_id"])
+        existing_queue["orders"].append(order["_id"])
         self.queue.update(
-            {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
+            {"_id": ObjectId(_id)}, {
+                "$set": {"orders": existing_queue["orders"]}}
         )
 
     # deletes a specific queue from specific user
@@ -161,6 +146,6 @@ class Atlas:
         # removes the queue from the user
         existing_user["queues"].remove(queueId)
         self.user.update(
-            {"_id": ObjectId(userId)}, {"$set": {"queues": existing_user["queues"]}}
+            {"_id": ObjectId(userId)}, {
+                "$set": {"queues": existing_user["queues"]}}
         )
-
