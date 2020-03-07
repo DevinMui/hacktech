@@ -41,7 +41,7 @@ class Atlas:
                 {"_id": ObjectId(_id)}, {"$set": {attributToUpdate: newValue}}
             )
         else:
-            return "error: order does not exist"
+            raise BadDataException("error: order does not exist")
 
     # returns the user document with specified name if user exists
     def getUser(self, _id: str):
@@ -49,6 +49,20 @@ class Atlas:
         if not existing_user:
             raise BadDataException("Not Found")
         return existing_user
+
+    # returns the order document with specified id if order exists
+    def getOrder(self, _id: str):
+        existing_order = self.order.find_one({"_id": ObjectId(_id)})
+        if not existing_order:
+            raise BadDataException("Not Found")
+        return existing_order
+
+    # returns the queue document with specified id if queue exists
+    def getQueue(self, _id: str):
+        existing_queue = self.queue.find_one({"_id": ObjectId(_id)})
+        if not existing_queue:
+            raise BadDataException("Not Found")
+        return existing_queue
 
     # prob dont need
     # removes user with specified user name
@@ -58,7 +72,7 @@ class Atlas:
             raise BadDataException("Not Found")
 
         for queue_id in existing_user["queues"]:
-            self.deleteQueue(queue_id)
+            self.deleteQueue(existing_user["_id"], queue_id)
         self.user.delete_one({"_id": ObjectId(_id)})
 
     def findOrder(self, _id: str):
@@ -76,12 +90,18 @@ class Atlas:
             raise BadDataException("Order has already been placed")
         self.order.insert(order)
 
+    def updateOrder(self, _id: str, data: dict):
+        existing_order = self.user.find_one({"_id": ObjectId(_id)})
+        if existing_order is None:
+            raise BadDataException("error: order does not exist")
+        self.order.replaceOne({"_id": ObjectId(_id)}, data)
+
     # deletes order of specified orderid
     def deleteOrder(self, itemId: str):
         existing_order = self.order.find_one({"itemId": itemId})
         if not existing_order:
             raise BadDataException("Order not found")
-        self.order.delete_one({"itemId": itemId})
+        self.order.delete_one({"_id": existing_order["_id"]})
 
     def findQueue(self, _id: str):
         queue = self.queue.find_one(ObjectId(_id))
@@ -132,6 +152,7 @@ class Atlas:
         if not existing_queue:
             raise BadDataException("Queue not found")
         existing_queue["orders"].append(order["_id"])
+        self.createOrder(order)
         self.queue.update(
             {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
         )

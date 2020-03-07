@@ -8,15 +8,15 @@ name = ""
 password = ""
 with open("config.json") as json_data_file:
     data = json.load(json_data_file)
-    name = data["self"]["user"]
-    password = data["self"]["passwd"]
+    name = data["db"]["user"]
+    password = data["db"]["passwd"]
 
 
 app = Flask(__name__)
 
 
 atlas = Atlas(
-    f"mongoself+srv://{name}:{password}@cluster0-u93bv.azure.mongoself.net/test?retryWrites=true&w=majority", db)
+    "mongodb+srv://"+name+":"+password+"1234>@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority")
 
 # HTTP REQUEST CODE TO IMPLEMENT:
 
@@ -37,17 +37,15 @@ def login():
         if reqData["password"] == loginUser["password"]:
             session["email"] = reqData["email"]
             return redirect(url_for("index"))
-    return "Invalid email/password combination"
+    raise BadDataException("Invalid email/password combination")
 
 
 # takes register data and creates a user document in db cluster of the user's info
-@app.route("/register", methods=["POST", "GET"])
+@app.route("/register", methods=["POST"])
 def register():
-    if request.method == "POST":
-        reqData = request.get_json()
-        session["email"] = reqData["email"]
-        return atlas.createUser(reqData)
-    return "Register Here"
+    reqData = request.get_json()
+    session["email"] = reqData["email"]
+    return atlas.createUser(reqData)
 
 
 @app.route("/user", methods=["GET"])
@@ -56,17 +54,40 @@ def user():
     return atlas.getUser(reqData["_id"])
 
 
+@app.route("/order", methods=["GET"])
+def order():
+    reqData = request.get_json()
+    return atlas.getOrder(reqData['_id'])
+
+
+@app.route("/queue", methods=["GET"])
+def queue():
+    reqData = request.get_json()
+    return atlas.getQueue(reqData['_id'])
+
 # takes order information in json format
-@app.route("/enqueueOrder", methods=["POST"])
-def enqueueOrder():
+@app.route("/enqueue_order", methods=["POST"])
+def enqueue_order():
     reqData = request.get_json()
     atlas.enqueue(reqData['_id'], reqData['order'])
 
 # dequeues order information in json format
-@app.route("/dequeueOrder", methods=["POST"])
-def dequeueOrder():
+@app.route("/dequeue_order", methods=["POST", "GET"])
+def dequeue_order():
     reqData = request.get_json()
-    atlas.dequeue(reqData['_id'])
+    return atlas.dequeue(reqData['_id'])
+
+
+@app.route("/create_queue", methods=["POST"])
+def create_queue():
+    reqData = request.get_json()
+    atlas.createQueue(reqData['_id'], reqData['data'])
+
+
+@app.route("/update_order", methods=["POST"])
+def update_order():
+    reqData = request.get_json()
+    atlas.updateOrder(reqData['_id'], reqData['data'])
 
 
 if __name__ == "__main__":
