@@ -8,15 +8,15 @@ name = ""
 password = ""
 with open("config.json") as json_data_file:
     data = json.load(json_data_file)
-    name = data["self"]["user"]
-    password = data["self"]["passwd"]
+    name = data["db"]["user"]
+    password = data["db"]["passwd"]
 
 
 app = Flask(__name__)
 
 
 atlas = Atlas(
-    f"mongoself+srv://{name}:{password}@cluster0-u93bv.azure.mongoself.net/test?retryWrites=true&w=majority", db)
+    "mongodb+srv://"+name+":"+password+"1234>@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority")
 
 # HTTP REQUEST CODE TO IMPLEMENT:
 

@@ -41,7 +41,7 @@ class Atlas:
                 {"_id": ObjectId(_id)}, {"$set": {attributToUpdate: newValue}}
             )
         else:
-            return "error: order does not exist"
+            raise BadDataException("error: order does not exist")
 
     # returns the user document with specified name if user exists
     def getUser(self, _id: str):
@@ -84,7 +84,14 @@ class Atlas:
             raise BadDataException("Order has already been placed")
         self.order.insert(order)
 
-    # deletes order of specified orderid
+    def updateOrder(self, _id: str, data: dict):
+        existing_order = self.user.find_one({"_id": ObjectId(_id)})
+        if existing_order is None:
+            raise BadDataException("error: order does not exist")
+        self.order.replaceOne(
+            {"_id": ObjectId(_id)}, data
+        )
+
     def deleteOrder(self, ebay_id: str):
         existing_order = self.order.find_one({"ebay_id": ebay_id})
         if not existing_order:
