@@ -10,7 +10,8 @@
     "content_scripts": [
       {
         "matches": ["*://www.ebay.com/sch/i.html*"],
-        "js": ["search.js"]
+        "js": ["search.js"],
+        "css":["search.css"]
       }
     ],
     "page_action": {

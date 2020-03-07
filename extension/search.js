@@ -1,7 +1,7 @@
 // works on ebay search page: https://www.ebay.com/sch/i.html
 
 function getResults() {
-    return Array.prototype.slice.call(document.querySelectorAll('ul.srp-results.srp-list.clearfix>li'))
+    return document.querySelectorAll('ul.srp-results.srp-list.clearfix>li')
     // arr.map(doSomething)
 }
 
@@ -28,7 +28,17 @@ waitFor('ul.srp-results.srp-list.clearfix>li').then(afterLoad).catch(console.log
 
 function afterLoad() {
     let searchResults = getResults()
-    searchResults.map(i=>i.innerHTML = '')
+    searchResults.forEach(i=>addPlus(i))
+}
+
+function addPlus(elem) {
+    let inside = document.createElement('d')
+    inside.innerHTML = ('<div class="add-to-queue-btn">Add to Queue</div>')
+    inside.addEventListener('click', console.log)
+    elem.appendChild(inside)
 }
  
+function createModal() {
+
+}
 
