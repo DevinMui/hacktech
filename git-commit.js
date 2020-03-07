@@ -1,4 +1,4 @@
-const name = 'aaronh'
+const name = 'aaron'
 const VideoCapture = require('camera-capture').VideoCapture
 const writeFileSync = require('fs').writeFileSync
 const fs = require('fs')
