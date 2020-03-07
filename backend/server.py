@@ -84,6 +84,12 @@ def create_queue():
     atlas.createQueue(reqData['_id'], reqData['data'])
 
 
+@app.route("/update_order", methods=["POST"])
+def update_order():
+    reqData = request.get_json()
+    atlas.updateOrder(reqData['_id'], reqData['data'])
+
+
 if __name__ == "__main__":
     app.secret_key = "secret"
     app.run(debug=True)
