@@ -1,3 +1,5 @@
 tmp.jpg
 node_modules/
 git-commit.js
+Database/env
+Database/config.json
