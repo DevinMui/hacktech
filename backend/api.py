@@ -16,14 +16,12 @@ class API:
         redirectName: str,
         scope: list,
         env: str = "SANDBOX",
-        saveToJSON: bool = True,
     ):
         self.appId = appId
         self.certId = certId
         self.credential = b64encode((appId + ":" + certId).encode()).decode("utf-8")
         self.redirectName = redirectName
         self.scope = " ".join(scope)
-        self.saveToJSON = saveToJSON
         self.url = (
             "https://api.sandbox.ebay.com"
             if env is "SANDBOX"
@@ -48,8 +46,8 @@ class API:
 
     # function gets the user oauth token
     # option to save the token to a json file to reduce # api requests
-    def getUserAccessToken(self, code: str):
-        if self.saveToJSON:
+    def getUserAccessToken(self, code: str, saveToJSON=True):
+        if saveToJSON:
             try:
                 with open("user.json") as f:
                     data = json.load(f)
@@ -81,7 +79,7 @@ class API:
         self.tokenExpires = now + timedelta(seconds=token["expires_in"])
         self.refreshToken = token["refresh_token"]
         self.refreshExpires = now + timedelta(seconds=token["refresh_token_expires_in"])
-        if self.saveToJSON:
+        if saveToJSON:
             data = {
                 "access_token": self.accessToken,
                 "token_expires": self.tokenExpires.strftime("%c"),
@@ -98,9 +96,7 @@ class API:
         }
         body = f"grant_type=refresh_token&refresh_token={self.refreshToken}&scope={self.scope}"
 
-        tokenObj = post(
-            self.url + "/identity/v1/oauth2/token", data=body, headers=headers
-        )
+        tokenObj = post(self.url, data=body, headers=headers)
         now = datetime.now()
         if not tokenObj.ok:
             tokenObj.raise_for_status()
@@ -108,15 +104,6 @@ class API:
         token = tokenObj.json()
         self.accessToken = token["access_token"]
         self.tokenExpires = now + timedelta(seconds=token["expires_in"])
-        if self.saveToJSON:
-            data = {
-                "access_token": self.accessToken,
-                "token_expires": self.tokenExpires.strftime("%c"),
-                "refresh_token": self.refreshToken,
-                "refresh_expires": self.refreshExpires,
-            }
-            with open("user.json", "w") as f:
-                json.dump(data, f)
 
     # authenticated get/post requests
     def get(self, uri: str, query: list = None, headers: dict = None):
