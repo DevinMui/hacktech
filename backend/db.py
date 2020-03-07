@@ -16,7 +16,7 @@ class Atlas:
         self.queue = self.db.queue
 
     # creates user from req_data in json format
-    def createUser(self, data: dict = None, name: str = None, email: str = None):
+    def createUser(self, data: dict = None):
         if not data:
             raise BadDataException("name or email not provided")
         if not (data["name"] and data["email"]):
@@ -44,8 +44,8 @@ class Atlas:
             raise BadDataException("error: order does not exist")
 
     # returns the user document with specified name if user exists
-    def getUser(self, _id: str):
-        existing_user = self.user.find_one({"_id": ObjectId(_id)})
+    def getUser(self, email: str):
+        existing_user = self.user.find_one({"email": email})
         if not existing_user:
             raise BadDataException("Not Found")
         return existing_user
@@ -117,12 +117,13 @@ class Atlas:
             raise BadDataException("User not found")
 
         queue = self.queue.insert(
-            {"start": False, "orders": [], "max_bid": data["max_bid"],}
+            {"start": False, "orders": [], "max_bid": data["max_bid"], }
         )
         # adds the queueid to the array of queues each user has
         existing_user["queues"].append(queue["_id"])
         user = self.user.update(
-            {"_id": ObjectId(_id)}, {"$set": {"queues": existing_user["queues"]}},
+            {"_id": ObjectId(_id)}, {
+                "$set": {"queues": existing_user["queues"]}},
         )
         return user
 
@@ -140,7 +141,8 @@ class Atlas:
 
         # deletes the order and updates queue array of orders
         self.queue.update(
-            {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
+            {"_id": ObjectId(_id)}, {
+                "$set": {"orders": existing_queue["orders"]}}
         )
         self.deleteOrder(to_return)
 
@@ -154,7 +156,8 @@ class Atlas:
         existing_queue["orders"].append(order["_id"])
         self.createOrder(order)
         self.queue.update(
-            {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
+            {"_id": ObjectId(_id)}, {
+                "$set": {"orders": existing_queue["orders"]}}
         )
 
     # deletes a specific queue from specific user
@@ -176,5 +179,6 @@ class Atlas:
         # removes the queue from the user
         existing_user["queues"].remove(queueId)
         self.user.update(
-            {"_id": ObjectId(userId)}, {"$set": {"queues": existing_user["queues"]}}
+            {"_id": ObjectId(userId)}, {
+                "$set": {"queues": existing_user["queues"]}}
         )

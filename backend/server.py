@@ -32,12 +32,13 @@ def index():
 @app.route("/login", methods=["POST"])
 def login():
     reqData = request.get_json()
-    loginUser = atlas.getUser(reqData["_id"])
-    if loginUser:
-        if reqData["password"] == loginUser["password"]:
-            session["email"] = reqData["email"]
-            return redirect(url_for("index"))
-    raise BadDataException("Invalid email/password combination")
+    if reqData is None:
+        return 'No request data'
+    loginUser = atlas.getUser(reqData["email"])
+    if reqData["password"] == loginUser["password"]:
+        session["email"] = reqData["email"]
+        return loginUser
+    return "Invalid email/password combination"
 
 
 # takes register data and creates a user document in db cluster of the user's info
