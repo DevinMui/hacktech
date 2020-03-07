@@ -32,11 +32,12 @@ def index():
 @app.route("/login", methods=["POST"])
 def login():
     reqData = request.get_json()
-    loginUser = atlas.getUser(reqData["_id"])
-    if loginUser:
-        if reqData["password"] == loginUser["password"]:
-            session["email"] = reqData["email"]
-            return redirect(url_for("index"))
+    if reqData is None:
+        raise BadDataException("No Data Received")
+    loginUser = atlas.getUser(reqData["email"])
+    if reqData["password"] == loginUser["password"]:
+        session["email"] = reqData["email"]
+        return loginUser
     raise BadDataException("Invalid email/password combination")
 
 
