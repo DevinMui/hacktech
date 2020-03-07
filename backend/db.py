@@ -50,6 +50,20 @@ class Atlas:
             raise BadDataException("Not Found")
         return existing_user
 
+    # returns the order document with specified id if order exists
+    def getOrder(self, _id: str):
+        existing_order = self.order.find_one({"_id": ObjectId(_id)})
+        if not existing_order:
+            raise BadDataException("Not Found")
+        return existing_order
+
+    # returns the queue document with specified id if queue exists
+    def getQueue(self, _id: str):
+        existing_queue = self.queue.find_one({"_id": ObjectId(_id)})
+        if not existing_queue:
+            raise BadDataException("Not Found")
+        return existing_queue
+
     # prob dont need
     # removes user with specified user name
     def removeUser(self, _id: str):
@@ -58,7 +72,7 @@ class Atlas:
             raise BadDataException("Not Found")
 
         for queue_id in existing_user["queues"]:
-            self.deleteQueue(queue_id)
+            self.deleteQueue(existing_user['_id'], queue_id)
         self.user.delete_one({"_id": ObjectId(_id)})
 
     # creates an order with specified information
