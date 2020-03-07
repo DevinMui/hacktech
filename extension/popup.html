@@ -2,6 +2,12 @@
 <html>
 
 <head>
+  <!-- Remember to include jQuery :) -->
+<script src="jquery.js"></script>
+
+<!-- jQuery Modal -->
+<script src="jquery.modal.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     body {
@@ -45,7 +51,7 @@
       align-items: center;
     }
 
-    #list-card {
+    .list-card {
       border: 1px solid #ccc;
     }
 
@@ -73,6 +79,31 @@
       color: inherit;
       text-decoration: inherit;
     }
+    #items-list {
+      padding: 18px;
+      background: white;
+      padding-bottom: 0px;
+    }
+    .item-row {
+      display: flex;
+    }
+    .item-cost {
+      text-align: right;
+    }
+    .item-row > img {
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      height: 150px;
+      width: 150px;
+      margin-bottom: 18px;
+    }
+    .item-title {
+      flex-grow: 1;
+      padding-left: 24px;
+    }
+    .close-modal {
+      visibility: hidden
+    }
   </style>
 </head>
 
@@ -94,6 +125,7 @@
       </h1>
     </div>
   </div>
+<div id="ex1" class="modal"></div>
 <script src="popup.js"></script>
 </body>
 
