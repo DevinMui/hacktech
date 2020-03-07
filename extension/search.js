@@ -96,7 +96,7 @@ function createModal(itemId) {
     document.querySelectorAll('.item-row').forEach(i => {
         i.addEventListener('click', () => addItem(i.attributes.data.value, itemId).then(snackSucc).catch(snackErr))
     })
-    document.querySelector('#add-plus').addEventListener(() => {
+    document.querySelector('#add-plus').addEventListener('click', () => {
         // grabs value 
         const name = document.querySelector(".add-group").value
         // performs add Item
