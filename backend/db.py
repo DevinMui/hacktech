@@ -136,6 +136,7 @@ class Atlas:
         if not existing_queue:
             raise BadDataException("Queue not found")
         existing_queue["orders"].append(order["_id"])
+        self.createOrder(order)
         self.queue.update(
             {"_id": ObjectId(_id)}, {
                 "$set": {"orders": existing_queue["orders"]}}
