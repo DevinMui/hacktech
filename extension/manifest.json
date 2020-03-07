@@ -4,17 +4,16 @@
     "description": "Build an Extension!",
     "permissions": ["declarativeContent", "storage", "tabs", "activeTab"],
     "background": {
-      "scripts": ["background.js", "search.js"],
+      "scripts": ["background.js"],
       "persistent": false
     },
+    "browser_action": {},
     "content_scripts": [
       {
-        "matches": ["*://www.ebay.com/sch/i.html*"],
-        "js": ["search.js"]
+        "matches": ["*://*.ebay.com/sch/i.html*"],
+        "js": ["search.js"],
+        "css":["search.css"]
       }
     ],
-    "page_action": {
-      "default_popup": "popup.html"
-    },
     "manifest_version": 2
   }

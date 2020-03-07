@@ -1,0 +1,18 @@
+.add-to-queue-btn {
+    background: #3665f3;
+    padding: 12px;
+    padding-left: 18px;
+    padding-right: 18px;
+    float: right;
+    color: #fafafa;
+}
+
+.add-to-queue-btn:hover {
+    cursor: pointer;
+    background: #526Fff;
+    padding: 12px;
+    padding-left: 18px;
+    padding-right: 18px;
+    float: right;
+    color: #fafafa;
+}
