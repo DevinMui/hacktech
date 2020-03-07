@@ -22,19 +22,37 @@ function waitFor(selector) {
     });
 }
 
-
 console.log('extension active')
-waitFor('ul.srp-results.srp-list.clearfix>li').then(afterLoad).catch(console.log)
+if(window.location.href.match(/https?:\/\/www.ebay.com\/itm/)) // product page
+    waitFor('.actPanel').then(afterItemLoad).catch(console.log)
+else // search page
+    waitFor('ul.srp-results.srp-list.clearfix>li').then(afterSearchLoad).catch(console.log)
 
-function afterLoad() {
+function afterItemLoad() {
+    addPlusItem(document.querySelector('.actPanel'))
+    document.querySelector('body').appendChild((() => { a = document.createElement('div'); a.className = 'modal'; a.id = 'ex1'; return a })())
+}
+
+function afterSearchLoad() {
     let searchResults = getResults()
     searchResults.forEach(i => addPlus(i))
     document.querySelector('body').appendChild((() => { a = document.createElement('div'); a.className = 'modal'; a.id = 'ex1'; return a })())
 }
 
+function addPlusItem(elem) {
+    let inside = document.createElement('div')
+    inside.style.cssText = 'text-align: right; margin-bottom: 12px; margin-right: 18px'
+    inside.innerHTML = (`<div rel="modal:open" style="width: 8.5625rem; background: #526Fff; color:white" class="btn">Add to Queue</div>`)
+    // TODO: get itemId
+    const itemId = 0
+    inside.childNodes[0].addEventListener('click', () => createModal(itemId))
+    elem.appendChild(inside)
+}
+
+
 function addPlus(elem) {
     let inside = document.createElement('div')
-    inside.innerHTML = ('<div rel="modal:open" class="add-to-queue-btn">Add to Queue</div>')
+    inside.innerHTML = (`<div rel="modal:open" class="add-to-queue-btn">Add to Queue</div>`)
     // TODO: get itemId
     const itemId = 0
     inside.addEventListener('click', () => createModal(itemId))
@@ -78,7 +96,7 @@ function createModal(itemId) {
         <img src="${item.image}"></img>
         <h2 class="item-title">${item.name}</h2>
     </div>
-`)
+    `)
     const footer = `
     <div style="width: 100%; display: flex; cursor:pointer">
         <input class="add-group" input="text" placeholder="Add to new group..."></input>
@@ -88,7 +106,7 @@ function createModal(itemId) {
     const outer = `
     <div id="modal-outer">
         ${title}
-        ${items}
+        ${items.join('')}
         ${footer}
     </div>
     `
@@ -100,12 +118,13 @@ function createModal(itemId) {
         // grabs value 
         const name = document.querySelector(".add-group").value
         // performs add Item
-        newGroup(name, itemId).then(snackSucc).catch(snackErr)
+        newGroup(name, itemId).then(() => {snackSucc(); setTimeout(window.location.reload, 3000)}).catch(snackErr)
     })
     $('#ex1').modal({
         fadeDuration: 250,
         showClose: false
     });
+    document.querySelector('.jquery-modal').style['z-index'] = 999 // ebay has some high z-index elems
 }
 
 async function removeItem(id) {
@@ -131,5 +150,6 @@ function snackErr(e) {
 }
 
 async function newGroup(name, itemId) {
-    // cTODO: reates a new group with one item in it
+    // TODO: reates a new group with one item in it
+
 }

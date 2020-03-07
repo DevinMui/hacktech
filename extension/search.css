@@ -17,6 +17,10 @@
     color: #fafafa;
 }
 
+.jquery-modal {
+    z-index: 999
+}
+
 .item-row {
     display: flex;
     align-items: center;
