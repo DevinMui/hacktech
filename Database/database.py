@@ -2,10 +2,19 @@ from flask import Flask, render_template, url_for, request, session, redirect
 from pymongo import MongoClient
 import json
 
+username = ''
+password = ''
+with open('config.json') as json_data_file:
+    data = json.load(json_data_file)
+    username = data['db']['user']
+    password = data['db']['passwd']
+
 app = Flask(__name__)
 
-client = MongoClient(
-    'mongodb+srv://sky:1234@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority')
+print(username, password)
+client = MongoClient('mongodb+srv://'+username+':'+password +
+                     '@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority')
+
 
 db = client.ebayBidQueue
 
@@ -51,7 +60,8 @@ def createUser(req_data):
     user = db.user
     existing_user = user.find_one({'username': req_data['username']})
     existing_email = user.find_one({'email': req_data['email']})
-
+    if req_data['username'] == '' or req_data['email'] == '':
+        return 'error: empty input'
     if existing_user is None and existing_email is None:
         user.insert(
             {'email': req_data['email'], 'username': req_data['username'], 'password': req_data['password'],
@@ -83,6 +93,8 @@ def removeUser(username):
 
 def createOrder(name, ebayID):
     existing_order = db.order.find_one({'orderid': ebayID})
+    if name == '':
+        return 'error, input empty'
     if existing_order is None:
         db.order.insert(
             {'orderid': ebayID, 'name': name}
@@ -92,7 +104,7 @@ def createOrder(name, ebayID):
 
 
 def deleteOrder(orderid):
-    existing_order = db.order.find_one({'orderid': ebayID})
+    existing_order = db.order.find_one({'orderid': orderid})
     if existing_order:
         db.order.delete_one({
             "orderid": orderid
