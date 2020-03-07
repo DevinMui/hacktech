@@ -11,7 +11,7 @@
     "content_scripts": [
       {
         "matches": ["*://*.ebay.com/sch/i.html*"],
-        "js": ["search.js"],
+        "js": ["search.js", "jquery.js", "jquery.modal.js"],
         "css":["search.css"]
       }
     ],
