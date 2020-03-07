@@ -28,17 +28,108 @@ waitFor('ul.srp-results.srp-list.clearfix>li').then(afterLoad).catch(console.log
 
 function afterLoad() {
     let searchResults = getResults()
-    searchResults.forEach(i=>addPlus(i))
+    searchResults.forEach(i => addPlus(i))
+    document.querySelector('body').appendChild((() => { a = document.createElement('div'); a.className = 'modal'; a.id = 'ex1'; return a })())
 }
 
 function addPlus(elem) {
-    let inside = document.createElement('d')
-    inside.innerHTML = ('<div class="add-to-queue-btn">Add to Queue</div>')
-    inside.addEventListener('click', console.log)
+    let inside = document.createElement('div')
+    inside.innerHTML = ('<div rel="modal:open" class="add-to-queue-btn">Add to Queue</div>')
+    // TODO: get itemId
+    const itemId = 0
+    inside.addEventListener('click', () => createModal(itemId))
     elem.appendChild(inside)
-}
- 
-function createModal() {
 
 }
 
+function getGroupItems(group) {
+    // returns name given id
+    switch (group._id) {
+        case "1":
+            return {
+                "_id": group._id,
+                "name": "one",
+                "image": "https://i.ebayimg.com/thumbs/images/g/Y~IAAOSwHctbv3Pl/s-l225.webp    "
+            }
+        case "2":
+            return {
+                "_id": group._id,
+                "name": "two",
+                "image": "https://i.ebayimg.com/thumbs/images/g/Y~IAAOSwHctbv3Pl/s-l225.webp    "
+            }
+    }
+}
+
+function createModal(itemId) {
+    // grabs groups (AJAX)
+    let groups = [
+        { _id: "1" },
+        { _id: "2" }
+    ]
+
+    // create layout, onclicks
+    // loads groups into modal
+    const title = `<div style="text-align:center"><h1 style="margin-top: 0; font-weight: 200; font-size: 24px">
+        Add to Queue
+    </h1></div>`
+    let itemsList = groups.map(getGroupItems)
+    const items = itemsList.map((item) => `
+    <div class="item-row" data=${item._id}>
+        <img src="${item.image}"></img>
+        <h2 class="item-title">${item.name}</h2>
+    </div>
+`)
+    const footer = `
+    <div style="width: 100%; display: flex; cursor:pointer">
+        <input class="add-group" input="text" placeholder="Add to new group..."></input>
+        <span style="font-size: 36px; margin-left: 8px" id="add-plus">+</span>
+    </div>
+    `
+    const outer = `
+    <div id="modal-outer">
+        ${title}
+        ${items}
+        ${footer}
+    </div>
+    `
+    document.querySelector('.modal').innerHTML = outer
+    document.querySelectorAll('.item-row').forEach(i => {
+        i.addEventListener('click', () => addItem(i.attributes.data.value, itemId).then(snackSucc).catch(snackErr))
+    })
+    document.querySelector('#add-plus').addEventListener(() => {
+        // grabs value 
+        const name = document.querySelector(".add-group").value
+        // performs add Item
+        newGroup(name, itemId).then(snackSucc).catch(snackErr)
+    })
+    $('#ex1').modal({
+        fadeDuration: 250,
+        showClose: false
+    });
+}
+
+async function removeItem(id) {
+    // TODO: make a fetch to remove item
+    Snackbar.show({ text: 'Removed from queue.' });
+}
+
+async function addItem(id) {
+    // TODO: make a fetch
+    console.log(id)
+    $.modal.close()
+    return true
+}
+
+function snackSucc(e) {
+    console.log(e)
+    Snackbar.show({ text: 'Successfully added to group!', showAction: false, pos:'bottom-center' });
+}
+
+function snackErr(e) {
+    console.log(e)
+    Snackbar.show({ text: 'Please try again later :(' });
+}
+
+async function newGroup(name, itemId) {
+    // cTODO: reates a new group with one item in it
+}

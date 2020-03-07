@@ -16,3 +16,40 @@
     float: right;
     color: #fafafa;
 }
+
+.item-row {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.item-row>img {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    height: 100px;
+    width: 100px;
+    margin-bottom: 18px;
+    margin-top: 18px;
+}
+
+.item-title {
+    flex-grow: 1;
+    padding-left: 24px;
+}
+
+.add-group {
+    border: none;
+    font-size: 18px;
+    border-bottom:1px solid #757575;
+    padding:10px 10px 10px 5px;
+    flex-grow: 1;
+}
+
+.add-group:focus {
+    outline: none;
+}
+
+.add-group::placeholder {
+    font-style: italic;
+    color: rgba(0,0,0,0.3);
+  }

@@ -92,7 +92,7 @@ function createModalContents(id) {
     <h2 class="item-title">${item.name}</h2>
     <div class="item-cost">
         <h2>$${Number(item.cost).toFixed(2)}</h2>
-        <p style="cursor:pointer; color:#CC0000"  class="item-remove" data=${{i:i, id: item.id}}>Remove Item</p>
+        <p style="cursor:pointer; color:#CC0000"  class="item-remove" data=${{ i: i, id: item.id }}>Remove Item</p>
     </div>
 </div>
 `)
@@ -117,7 +117,7 @@ function createModalContents(id) {
         })
 
     })
-    document.querySelector('#modal-footer').addEventListener('click', ()=>deleteGroup(id))
+    document.querySelector('#modal-footer').addEventListener('click', () => deleteGroup(id))
 }
 
 function removeItem(i, id, reloadId) {
