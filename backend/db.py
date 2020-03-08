@@ -48,7 +48,7 @@ class Atlas:
         existing_user = self.user.find_one({"email": email})
         if not existing_user:
             raise BadDataException("Not Found")
-        return {'email': existing_user['email'], 'password': existing_user['password']}
+        return existing_user
 
     # returns the order document with specified id if order exists
     def getOrder(self, _id: str):
@@ -121,13 +121,12 @@ class Atlas:
             raise BadDataException("User not found")
 
         queue = self.queue.insert(
-            {"start": False, "orders": [], "max_bid": data["max_bid"], }
+            {"start": False, "orders": [], "max_bid": data["max_bid"],}
         )
         # adds the queueid to the array of queues each user has
         existing_user["queues"].append(queue["_id"])
         user = self.user.update(
-            {"_id": ObjectId(_id)}, {
-                "$set": {"queues": existing_user["queues"]}},
+            {"_id": ObjectId(_id)}, {"$set": {"queues": existing_user["queues"]}},
         )
         return user
 
@@ -145,8 +144,7 @@ class Atlas:
 
         # deletes the order and updates queue array of orders
         self.queue.update(
-            {"_id": ObjectId(_id)}, {
-                "$set": {"orders": existing_queue["orders"]}}
+            {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
         )
         self.deleteOrder(to_return)
 
@@ -159,8 +157,7 @@ class Atlas:
             raise BadDataException("Queue not found")
         existing_queue["orders"].append(order["_id"])
         self.queue.update(
-            {"_id": ObjectId(_id)}, {
-                "$set": {"orders": existing_queue["orders"]}}
+            {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
         )
         return self.createOrder(order)
 
@@ -183,7 +180,6 @@ class Atlas:
         # removes the queue from the user
         existing_user["queues"].remove(queueId)
         self.user.update(
-            {"_id": ObjectId(userId)}, {
-                "$set": {"queues": existing_user["queues"]}}
+            {"_id": ObjectId(userId)}, {"$set": {"queues": existing_user["queues"]}}
         )
         return existing_queue
