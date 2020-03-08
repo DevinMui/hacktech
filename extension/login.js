@@ -7,8 +7,11 @@ function submitFn() {
     const email = document.querySelector('#email').value
     const pw = document.querySelector('#password').value
     // TODO: do a post 
-    submit.value = 'Signing in...'
-    setTimeout(() => submitSuccess(), 1000)
+    // submit.value = 'Signing in...'
+    document.querySelector('.login-box').innerHTML = `
+    <img style="transform: translate(-25%, 10%)" src="loader.gif"></img>
+    <h1>Please wait while we load your credentials...</h1>`
+    setTimeout(() => submitSuccess(), 5000)
 }
 
 function submitSuccess(auth) {
