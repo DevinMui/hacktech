@@ -34,13 +34,6 @@ with open("config.json") as json_data_file:
     )
 
 
-def with_cors(response):
-    if type(response) != Response:
-        response = jsonify(response)
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    return response
-
-
 app = Flask(__name__)
 
 atlas = Atlas(url)
@@ -57,7 +50,7 @@ def after_request(response):
 @app.route("/")
 def index():
     response = jsonify({"email": "email"})
-    return redirect(url_for("static", filename="./template/index.html"))
+    return render_template("index.html")
 
 
 @app.route("/oauth", methods=["GET"])
@@ -69,9 +62,10 @@ def oauth():
     # return user or register
     user = atlas.getUser(ebayUser["individualAccount"]["email"])
     if not user:
-        return jsonify(register(ebayUser))
+        jsonify(register(ebayUser))
+        return redirect("/")
 
-    return jsonify(user)
+    return redirect("/")
 
 
 def register(ebayUser):

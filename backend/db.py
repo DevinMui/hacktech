@@ -58,7 +58,7 @@ class Atlas:
     # returns the order document with specified id if order exists
     def getOrder(self, _id: str):
         existing_order = self.order.find({"_id": ObjectId(_id)}).next()
-        if existing_queue:
+        if existing_order:
             existing_order["_id"] = str(existing_order["_id"])
         return existing_order
 
@@ -85,7 +85,6 @@ class Atlas:
 
     def findOrder(self, _id: str):
         order = self.order.find(ObjectId(_id)).next()
-
         if order:
             order["_id"] = str(order["_id"])
         return order
@@ -94,11 +93,7 @@ class Atlas:
     def createOrder(self, order: dict = None):
         if not order:
             raise BadDataException("Order is empty")
-        existing_order = self.order.find_one({"itemId": order["itemId"]})
-        if existing_order:
-            raise BadDataException("Order has already been placed")
-        self.order.insert(order)
-        order["_id"] = str(order["_id"])
+        order = self.order.insert(order)
         return order
 
     def updateOrder(self, _id: str, data: dict):
@@ -150,6 +145,7 @@ class Atlas:
 
         queue = self.queue.insert(
             {
+                "name": data["name"],
                 "start": False,
                 "orders": [],
                 "dequeued_orders": [],
@@ -157,12 +153,11 @@ class Atlas:
             }
         )
         # adds the queueid to the array of queues each user has
-        existing_user["queues"].append(str(queue["_id"]))
+        existing_user["queues"].append(str(queue))
         user = self.user.update(
             {"_id": ObjectId(_id)}, {"$set": {"queues": existing_user["queues"]}},
         )
-        user["_id"] = str(user["_id"])
-        return user
+        return str(user)
 
     # dequeues an order from the queue assuming the queue is sorted
     def dequeue(self, _id):
@@ -174,7 +169,7 @@ class Atlas:
             raise BadDataException("No orders in queue")
 
         # pops the first order off the queue
-        to_return = existing_queue["orders"].pop(0)
+        to_return = str(existing_queue["orders"].pop(0))
         existing_queue["dequeued_orders"].append(to_return)
 
         # deletes the order and updates queue array of orders
@@ -187,21 +182,20 @@ class Atlas:
                 }
             },
         )
-        self.deleteOrder(to_return)
 
-        to_return["_id"] = str(to_return["_id"])
-        return to_return
+        return {"orderId": to_return}
 
     # enqueues a order of specified information into specific queue
     def enqueue(self, _id: str, order: dict):
         existing_queue = self.queue.find({"_id": ObjectId(_id)}).next()
         if not existing_queue:
             raise BadDataException("Queue not found")
-        existing_queue["orders"].append(str(order["_id"]))
+        order = self.createOrder(order)
+        existing_queue["orders"].append(str(order))
         self.queue.update(
             {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
         )
-        return self.createOrder(order)
+        return {"orderId": str(order)}
 
     # deletes a specific queue from specific user
     def deleteQueue(self, userId: str, queueId: str):
