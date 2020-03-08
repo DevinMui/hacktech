@@ -58,7 +58,6 @@ def after_request(response):
 def index():
     response = jsonify({"email": "email"})
     return render_template("index.html")
-    return redirect(url_for("static", filename="./template/index.html"))
 
 
 @app.route("/oauth", methods=["GET"])
