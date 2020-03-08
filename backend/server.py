@@ -36,22 +36,39 @@ atlas = Atlas(
 
 
 @app.route("/oauth", methods=["GET"])
-def login():
+def oauth():
     code = request.args.get("code")
     token = api.getUserAccessToken(code)
-    user = api.getUser(token)
+    ebayUser = api.getUser(token)
     # check user email against db
     # return user or register
+    user = atlas.getUser(ebayUser["individualAccount"]["email"])
+    if not user:
+        return jsonify(register(ebayUser))
 
     return jsonify(user)
 
 
-# takes register data and creates a user document in db cluster of the user's info
-@app.route("/register", methods=["POST"])
 def register():
-    reqData = request.get_json()
-    session["email"] = reqData["email"]
-    return atlas.createUser(reqData)
+    email = ebayUser["individualAccount"]["email"]
+    name = (
+        ebayUser["individualAccount"]["firstName"]
+        + " "
+        + ebayUser["individualAccount"]["lastName"]
+    )
+    data = {"email": email, "name": name}
+    return atlas.createUser(data)
+
+
+# store _id
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    email = data["email"]
+    user = atlas.getUser(email)
+    if not user:
+        return jsonify({"error": "error"})
+    return jsonify(user)
 
 
 @app.route("/user", methods=["GET"])
