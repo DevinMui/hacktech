@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for, request, session, redirect, jsonify
 
+
 from db import *
 
 from api import API
@@ -67,7 +68,7 @@ def register():
 @app.route("/user", methods=["GET"])
 def user():
     reqData = request.get_json()
-    return atlas.getUser(reqData["_id"])
+    return atlas.getUser(reqData["email"])
 
 
 @app.route("/order", methods=["GET"])
@@ -86,7 +87,7 @@ def queue():
 @app.route("/enqueue_order", methods=["POST"])
 def enqueue_order():
     reqData = request.get_json()
-    atlas.enqueue(reqData["_id"], reqData["order"])
+    return atlas.enqueue(reqData["_id"], reqData["order"])
 
 
 # dequeues order information in json format
@@ -99,13 +100,13 @@ def dequeue_order():
 @app.route("/create_queue", methods=["POST"])
 def create_queue():
     reqData = request.get_json()
-    atlas.createQueue(reqData["_id"], reqData["data"])
+    return atlas.createQueue(reqData["_id"], reqData["data"])
 
 
 @app.route("/update_order", methods=["POST"])
 def update_order():
     reqData = request.get_json()
-    atlas.updateOrder(reqData["_id"], reqData["data"])
+    return atlas.updateOrder(reqData["_id"], reqData["data"])
 
 
 if __name__ == "__main__":
