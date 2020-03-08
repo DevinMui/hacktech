@@ -132,4 +132,17 @@ function deleteGroup(id) {
     window.location.reload()
 }
 
+function securityFail() {
+    // invalidate token
+    chrome.storage.sync.set({auth: undefined})
+    queryInfo = {active: true};
+    chrome.tabs.query(queryInfo, function(result) {
+        var activeTab = result[1].id;
+        updateProperties = {'url': chrome.extension.getURL('login_page.html'), 'selected': true};
+        chrome.tabs.update(activeTab, updateProperties, function() {
+            // Anything else you want to do after the tab has been updated.
+        });
+    });
+}
+
 loadCharacters();

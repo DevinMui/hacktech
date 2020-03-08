@@ -79,6 +79,9 @@ function getGroupItems(group) {
 }
 
 function createModal(itemId) {
+    // if auth fails...
+    if(!checkToken()) securityFail()
+
     // grabs groups (AJAX)
     let groups = [
         { _id: "1" },
@@ -152,4 +155,22 @@ function snackErr(e) {
 async function newGroup(name, itemId) {
     // TODO: reates a new group with one item in it
 
+}
+
+function checkToken() {
+    if(!chrome.storage.sync.get('auth')) return false
+    return true
+}
+
+function securityFail() {
+    // invalidate token
+    chrome.storage.sync.set({auth: undefined})
+    queryInfo = {active: true};
+    chrome.tabs.query(queryInfo, function(result) {
+        var activeTab = result[1].id;
+        updateProperties = {'url': chrome.extension.getURL('login_page.html'), 'selected': true};
+        chrome.tabs.update(activeTab, updateProperties, function() {
+            // Anything else you want to do after the tab has been updated.
+        });
+    });
 }
