@@ -14,6 +14,7 @@ with open("config.json") as json_data_file:
     data = json.load(json_data_file)
     name = data["db"]["user"]
     password = data["db"]["passwd"]
+    url = data["db"]["url"]
     api = API(
         data["ebay"]["appId"],
         data["ebay"]["certId"],
@@ -27,11 +28,12 @@ app = Flask(__name__)
 
 
 atlas = Atlas(
-    "mongodb+srv://"
-    + name
-    + ":"
-    + password
-    + "1234>@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority"
+    url
+    # "mongodb+srv://"
+    # + name
+    # + ":"
+    # + password
+    # + "1234>@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority"
 )
 
 
@@ -49,7 +51,7 @@ def oauth():
     return jsonify(user)
 
 
-def register():
+def register(ebayUser):
     email = ebayUser["individualAccount"]["email"]
     name = (
         ebayUser["individualAccount"]["firstName"]
