@@ -83,8 +83,8 @@ class Atlas:
         existing_user["_id"] = str(existing_user["_id"])
         return existing_user
 
-    def findOrder(self, _id: str):
-        order = self.order.find(ObjectId(_id)).next()
+    def findOrder(self, itemId: str):
+        order = self.order.find_one({"itemId": itemId})
         if order:
             order["_id"] = str(order["_id"])
         return order
@@ -125,15 +125,19 @@ class Atlas:
         queue["start"] = True
         queue = self.queue.replaceOne({"_id": ObjectId(_id)}, queue)
         # start thread
-        thread.startThread(queue["_id"])
-        queue["_id"] = str(queue["_id"])
+        thread.startThread(_id)
         return queue
 
     def stopQueue(self, _id: str):
         queue = findQueue(_id)
         queue["start"] = False
         queue = self.queue.replaceOne({"_id": ObjectId(_id)}, queue)
-        queue["_id"] = str(queue["_id"])
+        return queue
+
+    def removeOrderFromQueue(self, queue_id: str, order_id: str):
+        existing_queue = self.queue.find({"_id": ObjectId(queue_id)}).next()
+        existing_queue.remove(order_id)
+        queue = self.queue.replaceOne({"_id": ObjectId(queue_id)}, existing_queue)
         return queue
 
     # creates a queue for a specific user with queue_data in json format

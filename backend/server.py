@@ -128,11 +128,10 @@ def enqueue_order():
     return atlas.enqueue(reqData["_id"], reqData["order"])
 
 
-# dequeues order information in json format
-@app.route("/dequeue_order", methods=["POST"])
-def dequeue_order():
-    reqData = request.get_json()
-    return atlas.dequeue(reqData["_id"])
+@app.route("/remove_order_from_queue", methods=["POST"])
+def remove_order_from_queue():
+    data = request.get_json()
+    return atlas.removeOrderFromQueue(data["queue_id"], data["order_id"])
 
 
 @app.route("/create_queue", methods=["POST"])
