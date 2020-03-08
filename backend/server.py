@@ -80,7 +80,7 @@ def login():
 
 @app.route("/user", methods=["POST"])
 def user():
-    reqData = request.args()
+    reqData = request.get_json()
     return atlas.getUser(reqData["email"])
 
 
