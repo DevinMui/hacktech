@@ -57,6 +57,7 @@ def after_request(response):
 @app.route("/")
 def index():
     response = jsonify({"email": "email"})
+    return render_template("index.html")
     return redirect(url_for("static", filename="./template/index.html"))
 
 
