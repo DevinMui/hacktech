@@ -24,12 +24,12 @@ function waitFor(selector) {
 
 console.log('extension active')
 if(window.location.href.match(/https?:\/\/www.ebay.com\/itm/)) // product page
-    waitFor('.actPanel').then(afterItemLoad).catch(console.log)
+    waitFor('.actPanel .u-cb .u-flL').then(afterItemLoad).catch(console.log)
 else // search page
     waitFor('ul.srp-results.srp-list.clearfix>li').then(afterSearchLoad).catch(console.log)
 
 function afterItemLoad() {
-    addPlusItem(document.querySelector('.actPanel'))
+    addPlusItem(document.querySelector('.actPanel .u-cb .u-flL'))
     document.querySelector('body').appendChild((() => { a = document.createElement('div'); a.className = 'modal'; a.id = 'ex1'; return a })())
 }
 
@@ -42,7 +42,7 @@ function afterSearchLoad() {
 function addPlusItem(elem) {
     let inside = document.createElement('div')
     inside.style.cssText = 'text-align: right; margin-bottom: 12px; margin-right: 18px'
-    inside.innerHTML = (`<div rel="modal:open" style="width: 8.5625rem; background: #526Fff; color:white" class="btn">Add to Queue</div>`)
+    inside.innerHTML = (`<div class="btn btn-scnd btn-m vi-VR-btnWdth-L" rel="modal:open" style="margin-right: 20rem; margin-left: 20.102rem; margin-top: 2.0602rem; background: #526Fff; color:white" class="btn">Add to Queue</div>`)
     // TODO: get itemId
     const itemId = 0
     inside.childNodes[0].addEventListener('click', () => createModal(itemId))
