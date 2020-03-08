@@ -11,7 +11,7 @@
     "content_scripts": [
       {
         "matches": ["*://*.ebay.com/sch/i.html*", "*://*.ebay.com/itm/*"],
-        "js": ["search.js", "jquery.js", "jquery.modal.js", "snackbar.min.js"],
+        "js": ["jquery.js", "jquery.modal.js", "snackbar.min.js", "api.js", "search.js"],
         "css":["search.css", "jquery.modal.css", "snackbar.min.css"]
       }
     ],
