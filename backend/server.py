@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, session, redirect, jsonify
+from flask import Flask, render_template, url_for, request, session, redirect, jsonify, Response
 from db import *
 
 from api import API
@@ -23,6 +23,11 @@ with open("config.json") as json_data_file:
         "SANDBOX",
     )
 
+def with_cors(response):
+    if type(response) != Response:
+        response = jsonify(response)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 app = Flask(__name__)
 
@@ -50,9 +55,9 @@ def oauth():
     # return user or register
     user = atlas.getUser(ebayUser["individualAccount"]["email"])
     if not user:
-        return jsonify(register(ebayUser))
+        return with_cors(jsonify(register(ebayUser)))
 
-    return jsonify(user)
+    return with_cors(jsonify(user))
 
 
 def register(ebayUser):
@@ -63,7 +68,7 @@ def register(ebayUser):
         + ebayUser["individualAccount"]["lastName"]
     )
     data = {"email": email, "name": name}
-    return atlas.createUser(data)
+    return with_cors(atlas.createUser(data))
 
 
 # store _id
@@ -74,7 +79,7 @@ def login():
     user = atlas.getUser(email)
     if not user:
         return jsonify({"error": "error"})
-    return jsonify(user)
+    return with_cors(jsonify(user))
 
 
 @app.route("/user", methods=["POST"])
@@ -118,7 +123,7 @@ def create_queue():
 @app.route("/update_order", methods=["POST"])
 def update_order():
     reqData = request.get_json()
-    return atlas.updateOrder(reqData["_id"], reqData["data"])
+    return (atlas.updateOrder(reqData["_id"], reqData["data"]))
 
 
 if __name__ == "__main__":
