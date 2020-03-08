@@ -62,20 +62,20 @@ def oauth():
     # return user or register
     user = atlas.getUser(ebayUser["individualAccount"]["email"])
     if not user:
-        jsonify(register(ebayUser))
+        register(ebayUser, token)
         return redirect("/")
 
     return redirect("/")
 
 
-def register(ebayUser):
+def register(ebayUser, token):
     email = ebayUser["individualAccount"]["email"]
     name = (
         ebayUser["individualAccount"]["firstName"]
         + " "
         + ebayUser["individualAccount"]["lastName"]
     )
-    data = {"email": email, "name": name}
+    data = {"email": email, "name": name, "token": token}
     return atlas.createUser(data)
 
 

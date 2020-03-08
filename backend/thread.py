@@ -4,14 +4,14 @@ import threading
 from bson.objectid import ObjectId
 
 # start a thread for each order
-def startThread(api, atlas, queueId: str):
-    x = threading.Thread(target=bidOnQueue, args=(api, atlas, queueId))
+def startThread(api, atlas, user, queueId: str):
+    x = threading.Thread(target=bidOnQueue, args=(api, atlas, user, queueId))
     x.daemon = True
     x.start()
 
 
 # maxAmount should be in double format
-def bidOnQueue(api, atlas, _id: str):
+def bidOnQueue(api, atlas, user, _id: str):
     currBid = None
     sleepTime = 60
     while True:
@@ -23,7 +23,9 @@ def bidOnQueue(api, atlas, _id: str):
 
         # get new info
         for order in queue["orders"]:
-            item = api.get(f"/buy/browse/v1/item/{order['itemId']}")
+            item = api.get(
+                f"/buy/browse/v1/item/{order['itemId']}", token=user["token"]
+            )
             atlas.updateOrder(order["_id"], item)
 
         # sort order queue by user param
@@ -31,7 +33,9 @@ def bidOnQueue(api, atlas, _id: str):
 
         # we have a bid right now
         if currBid:
-            bid = api.get(f"/buy/offer/v1_beta/bidding/{order['itemId']}")
+            bid = api.get(
+                f"/buy/offer/v1_beta/bidding/{order['itemId']}", token=user["token"]
+            )
 
             # we lost bid
             if not bid["highBidder"]:
@@ -48,7 +52,9 @@ def bidOnQueue(api, atlas, _id: str):
         for order in queue["orders"]:
             # the user put a bid on an item w/o us knowing
             try:
-                bid = api.get(f"/buy/offer/v1_beta/bidding/{order['itemId']}")
+                bid = api.get(
+                    f"/buy/offer/v1_beta/bidding/{order['itemId']}", token=user["token"]
+                )
                 # we lost!
                 if not bid["highBidder"]:
                     currBid = None
@@ -81,7 +87,8 @@ def bidOnQueue(api, atlas, _id: str):
                     }
                     bid = api.post(
                         f"/buy/offer/v1_beta/bidding/{order['itemId']}/place_proxy_bid",
-                        json=payload,
+                        payload,
+                        token=user["token"],
                     )
                     currBid = bid
                     atlas.dequeue(order["_id"])
