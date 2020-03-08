@@ -1,6 +1,4 @@
 from flask import Flask, render_template, url_for, request, session, redirect, jsonify
-
-
 from db import *
 
 from api import API
