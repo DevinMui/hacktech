@@ -37,6 +37,11 @@ atlas = Atlas(
 )
 
 
+@app.route("/")
+def index():
+    return "hello"
+
+
 @app.route("/oauth", methods=["GET"])
 def oauth():
     code = request.args.get("code")
