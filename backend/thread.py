@@ -22,12 +22,12 @@ def bidOnQueue(api, atlas, _id: str):
             return
 
         # get new info
-        for order in queue:
+        for order in queue["orders"]:
             item = api.get(f"/buy/browse/v1/item/{order['itemId']}")
             atlas.updateOrder(order["_id"], item)
 
         # sort order queue by user param
-        sorted(queue, key=lambda k: k["currentPrice"])
+        sorted(queue["orders"], key=lambda k: k["currentPrice"])
 
         # we have a bid right now
         if currBid:
@@ -45,7 +45,7 @@ def bidOnQueue(api, atlas, _id: str):
                 continue
 
         # delete if outbidded
-        for order in queue:
+        for order in queue["orders"]:
             # the user put a bid on an item w/o us knowing
             try:
                 bid = api.get(f"/buy/offer/v1_beta/bidding/{order['itemId']}")
@@ -53,29 +53,30 @@ def bidOnQueue(api, atlas, _id: str):
                 if not bid["highBidder"]:
                     currBid = None
                     atlas.dequeue(order["_id"])
-                # we won the bid!
+                # we won!
                 elif bid["auctionStatus"] is "ENDED":
-                    # set flag
                     return
+                # bid is still on going
                 else:
                     currBid = bid
-                    atlas.dequeue(order["_id"])
+                    sleep(sleepTime)
+                    continue
 
-            # the user didnt put a bid on an item w/o us knowing
             except Exception:
                 # if item is too expensive
-                if order["currentPrice"] > queue["maxBid"]:
+                if order["currentPrice"] > queue["max_bid"]:
                     currBid = None
                     atlas.dequeue(order["_id"])
                 # auction is over
                 elif item["auctionStatus"] is "ENDED":
+                    currBid = None
                     atlas.dequeue(order["_id"])
                 else:
                     # place bid
                     payload = {
                         "maxAmount": {
                             "currency": "USD",
-                            "value": str(order["maxAmount"]),
+                            "value": str(queue["max_bid"]),
                         }
                     }
                     bid = api.post(
@@ -89,5 +90,5 @@ def bidOnQueue(api, atlas, _id: str):
         if not currBid and queue.empty():
             return
 
-    sleep(sleepTime)  # 1440 req/day (over ebay limit)
+    sleep(sleepTime)  # 5000 requests / day
 

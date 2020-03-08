@@ -49,8 +49,7 @@ atlas = Atlas(url)
 @app.after_request
 def after_request(response):
     response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers",
-                         "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE")
     return response
 
@@ -58,7 +57,7 @@ def after_request(response):
 @app.route("/")
 def index():
     response = jsonify({"email": "email"})
-    return redirect(url_for(filename='./template/index.html'))
+    return redirect(url_for("static", filename="./template/index.html"))
 
 
 @app.route("/oauth", methods=["GET"])

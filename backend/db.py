@@ -149,7 +149,12 @@ class Atlas:
             raise BadDataException("User not found")
 
         queue = self.queue.insert(
-            {"start": False, "orders": [], "max_bid": data["max_bid"],}
+            {
+                "start": False,
+                "orders": [],
+                "dequeued_orders": [],
+                "max_bid": data["max_bid"],
+            }
         )
         # adds the queueid to the array of queues each user has
         existing_user["queues"].append(str(queue["_id"]))
@@ -170,10 +175,17 @@ class Atlas:
 
         # pops the first order off the queue
         to_return = existing_queue["orders"].pop(0)
+        existing_queue["dequeued_orders"].append(to_return)
 
         # deletes the order and updates queue array of orders
         self.queue.update(
-            {"_id": ObjectId(_id)}, {"$set": {"orders": existing_queue["orders"]}}
+            {"_id": ObjectId(_id)},
+            {
+                "$set": {
+                    "orders": existing_queue["orders"],
+                    "dequeued_orders": existing_queue["dequeued_orders"],
+                }
+            },
         )
         self.deleteOrder(to_return)
 
