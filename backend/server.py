@@ -1,4 +1,5 @@
 from flask import Flask, render_template, url_for, request, session, redirect, jsonify
+from flask_cors import CORS
 from db import *
 
 from api import API
@@ -25,7 +26,7 @@ with open("config.json") as json_data_file:
 
 
 app = Flask(__name__)
-
+CORS(app)
 
 atlas = Atlas(
     url
