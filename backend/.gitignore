@@ -1,4 +1,5 @@
 config.json
+atlas.json
 env
 *.json
 __pycache__

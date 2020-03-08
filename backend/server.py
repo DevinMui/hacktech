@@ -78,19 +78,19 @@ def login():
     return jsonify(user)
 
 
-@app.route("/user", methods=["GET"])
+@app.route("/user", methods=["POST"])
 def user():
-    reqData = request.get_json()
+    reqData = request.args()
     return atlas.getUser(reqData["email"])
 
 
-@app.route("/order", methods=["GET"])
+@app.route("/order", methods=["POST"])
 def order():
     reqData = request.get_json()
     return atlas.getOrder(reqData["_id"])
 
 
-@app.route("/queue", methods=["GET"])
+@app.route("/queue", methods=["POST"])
 def queue():
     reqData = request.get_json()
     return atlas.getQueue(reqData["_id"])
@@ -104,7 +104,7 @@ def enqueue_order():
 
 
 # dequeues order information in json format
-@app.route("/dequeue_order", methods=["POST", "GET"])
+@app.route("/dequeue_order", methods=["POST"])
 def dequeue_order():
     reqData = request.get_json()
     return atlas.dequeue(reqData["_id"])
