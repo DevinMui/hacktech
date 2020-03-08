@@ -43,14 +43,7 @@ def with_cors(response):
 
 app = Flask(__name__)
 
-atlas = Atlas(
-    url
-    # "mongodb+srv://"
-    # + name
-    # + ":"
-    # + password
-    # + "1234>@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority"
-)
+atlas = Atlas(url)
 
 
 @app.after_request
@@ -64,15 +57,7 @@ def after_request(response):
 @app.route("/")
 def index():
     response = jsonify({"email": "email"})
-    # response.headers.set("Access-Control-Allow-Origin", "*")
-    # response.headers.set("Access-Control-Allow-Credentials", "true")
-    # response.headers.set(
-    #     "Access-Control-Allow-Methods", "GET, HEAD, OPTIONS, POST, PUT"
-    # )
-    # response.headers.set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept")
-    # print(response.headers)
     return response
-    # return with_cors(response)
 
 
 @app.route("/oauth", methods=["GET"])
@@ -128,6 +113,18 @@ def order():
 def queue():
     reqData = request.get_json()
     return atlas.getQueue(reqData["_id"])
+
+
+@app.route("/start_queue", methods=["POST"])
+def startQueue():
+    data = request.get_json()
+    return atlas.startQueue(data["_id"])
+
+
+@app.route("/stop_queue", methods=["POST"])
+def stopQueue():
+    data = request.get_json()
+    return atlas.stopQueue(data["_id"])
 
 
 # takes order information in json format

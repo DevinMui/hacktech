@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 # start a thread for each order
 def startThread(api, atlas, queueId: str):
     x = threading.Thread(target=bidOnQueue, args=(api, atlas, queueId))
+    x.daemon = True
     x.start()
 
 
@@ -17,6 +18,8 @@ def bidOnQueue(api, atlas, _id: str):
         # find orders
 
         queue = atlas.findQueue(_id)
+        if not queue["start"]:
+            return
 
         # get new info
         for order in queue:
@@ -24,8 +27,7 @@ def bidOnQueue(api, atlas, _id: str):
             atlas.updateOrder(order["_id"], item)
 
         # sort order queue by user param
-        # TODO
-        sorted(queue)
+        sorted(queue, key=lambda k: k["currentPrice"])
 
         # we have a bid right now
         if currBid:

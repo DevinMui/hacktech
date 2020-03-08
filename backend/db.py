@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 import json
 
+import thread
+
 
 class BadDataException(Exception):
     pass
@@ -120,6 +122,22 @@ class Atlas:
         queue = self.queue.find(ObjectId(_id)).next()
         if not queue:
             raise BadDataException("Queue not found")
+        queue["_id"] = str(queue["_id"])
+        return queue
+
+    def startQueue(self, _id: str):
+        queue = findQueue(_id)
+        queue["start"] = True
+        queue = self.queue.replaceOne({"_id": ObjectId(_id)}, queue)
+        # start thread
+        thread.startThread(queue["_id"])
+        queue["_id"] = str(queue["_id"])
+        return queue
+
+    def stopQueue(self, _id: str):
+        queue = findQueue(_id)
+        queue["start"] = False
+        queue = self.queue.replaceOne({"_id": ObjectId(_id)}, queue)
         queue["_id"] = str(queue["_id"])
         return queue
 
