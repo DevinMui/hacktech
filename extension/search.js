@@ -158,7 +158,7 @@ async function newGroup(name, itemId) {
 }
 
 function checkToken() {
-    if(!chrome.storage.sync.get('auth')) return false
+    if(!chrome.storage.sync.get('auth', ()=>{})) return false
     return true
 }
 
