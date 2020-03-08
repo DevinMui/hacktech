@@ -62,20 +62,20 @@ def oauth():
     # return user or register
     user = atlas.getUser(ebayUser["individualAccount"]["email"])
     if not user:
-        jsonify(register(ebayUser))
+        register(ebayUser, token)
         return redirect("/")
 
     return redirect("/")
 
 
-def register(ebayUser):
+def register(ebayUser, token):
     email = ebayUser["individualAccount"]["email"]
     name = (
         ebayUser["individualAccount"]["firstName"]
         + " "
         + ebayUser["individualAccount"]["lastName"]
     )
-    data = {"email": email, "name": name}
+    data = {"email": email, "name": name, "token": token}
     return atlas.createUser(data)
 
 
@@ -100,7 +100,7 @@ def user():
 @app.route("/order", methods=["POST"])
 def order():
     reqData = request.get_json()
-    return atlas.getOrder(reqData["_id"])
+    return atlas.getOrder(reqData["itemId"])
 
 
 @app.route("/queue", methods=["POST"])
@@ -128,11 +128,10 @@ def enqueue_order():
     return atlas.enqueue(reqData["_id"], reqData["order"])
 
 
-# dequeues order information in json format
-@app.route("/dequeue_order", methods=["POST"])
-def dequeue_order():
-    reqData = request.get_json()
-    return atlas.dequeue(reqData["_id"])
+@app.route("/remove_order_from_queue", methods=["POST"])
+def remove_order_from_queue():
+    data = request.get_json()
+    return atlas.removeOrderFromQueue(data["queue_id"], data["order_id"])
 
 
 @app.route("/create_queue", methods=["POST"])

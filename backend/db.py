@@ -57,7 +57,7 @@ class Atlas:
 
     # returns the order document with specified id if order exists
     def getOrder(self, _id: str):
-        existing_order = self.order.find({"_id": ObjectId(_id)}).next()
+        existing_order = self.order.find({"_id": _id}).next()
         if existing_order:
             existing_order["_id"] = str(existing_order["_id"])
         return existing_order
@@ -83,8 +83,8 @@ class Atlas:
         existing_user["_id"] = str(existing_user["_id"])
         return existing_user
 
-    def findOrder(self, _id: str):
-        order = self.order.find(ObjectId(_id)).next()
+    def findOrder(self, itemId: str):
+        order = self.order.find_one({"itemId": itemId})
         if order:
             order["_id"] = str(order["_id"])
         return order
@@ -97,7 +97,7 @@ class Atlas:
         return order
 
     def updateOrder(self, _id: str, data: dict):
-        existing_order = self.user.find({"_id": ObjectId(_id)}).next()
+        existing_order = self.order.find({"_id": ObjectId(_id)}).next()
         if existing_order is None:
             raise BadDataException("error: order does not exist")
         self.order.replaceOne({"_id": ObjectId(_id)}, data)
@@ -120,20 +120,25 @@ class Atlas:
         queue["_id"] = str(queue["_id"])
         return queue
 
-    def startQueue(self, _id: str):
-        queue = findQueue(_id)
+    def startQueue(self, user_id: str, queue_id: str):
+        user = self.user.find({"_id": ObjectId(user_id)}).next()
+        queue = findQueue(queue_id)
         queue["start"] = True
-        queue = self.queue.replaceOne({"_id": ObjectId(_id)}, queue)
+        queue = self.queue.replaceOne({"_id": ObjectId(queue_id)}, queue)
         # start thread
-        thread.startThread(queue["_id"])
-        queue["_id"] = str(queue["_id"])
+        thread.startThread(self, user, queue_id)
         return queue
 
     def stopQueue(self, _id: str):
         queue = findQueue(_id)
         queue["start"] = False
         queue = self.queue.replaceOne({"_id": ObjectId(_id)}, queue)
-        queue["_id"] = str(queue["_id"])
+        return queue
+
+    def removeOrderFromQueue(self, queue_id: str, order_id: str):
+        existing_queue = self.queue.find({"_id": ObjectId(queue_id)}).next()
+        existing_queue.remove(order_id)
+        queue = self.queue.replaceOne({"_id": ObjectId(queue_id)}, existing_queue)
         return queue
 
     # creates a queue for a specific user with queue_data in json format
