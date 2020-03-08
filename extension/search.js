@@ -37,7 +37,7 @@ function afterSearchLoad() {
     document.querySelector('body').appendChild((() => { a = document.createElement('div'); a.className = 'modal'; a.id = 'ex1'; return a })())
 }
 
-await function addPlusItem(elem) {
+async function addPlusItem(elem) {
     let inside = document.createElement('div')
     inside.style.cssText = 'text-align: right; margin-bottom: 12px; margin-right: 18px'
     inside.innerHTML = (`<div class="btn btn-scnd btn-m vi-VR-btnWdth-L" rel="modal:open" style="margin-right: 20rem; margin-left: 20.102rem; margin-top: 2.0602rem; background: #526Fff; color:white" class="btn">Add to Queue</div>`)
@@ -50,7 +50,7 @@ function getIdFromUrl(url) {
     return 'v1' + url.match(/\/([a-zA-Z0-9]+)\?/)[1] + '|0'
 }
 
-await function addPlus(elem) {
+async function addPlus(elem) {
     let inside = document.createElement('div')
     inside.innerHTML = (`<div rel="modal:open" class="add-to-queue-btn">Add to Queue</div>`)
     const itemId = getIdFromUrl(elem.querySelector('a').href)
@@ -179,7 +179,7 @@ function snackErr(e) {
 async function newGroup(name, maxBid, itemId) { // creates a new group
     maxBid = Number.parseFloat(maxBid)
     if(!maxBid) return Snackbar.show({ text: 'Please enter a valid bid' })
-    chrome.storage.sync.get(auth, (a) => {
+    chrome.storage.sync.get(auth, async (a) => {
         let r = await api.post('/create_queue', {_id: a.auth, data: {max_bid: maxBid, name: name}})
         r = r.json()
         createModal(itemId)
