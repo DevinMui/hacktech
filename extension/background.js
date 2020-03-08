@@ -1,6 +1,9 @@
-function checkToken() {
-  if(!chrome.storage.sync.get('auth', ()=>{})) return false
-  return true
+function checkToken(succ, fail) {
+  chrome.storage.sync.get('auth', e => {
+    console.log(e)
+    if(e) return succ()
+    fail()
+  })
 }
 
 chrome.runtime.onMessage.addListener(
@@ -15,7 +18,5 @@ function securityFail() {
 }
 
 chrome.browserAction.onClicked.addListener(function(tab) {
-  if(checkToken())
-    return chrome.tabs.create({'url': chrome.extension.getURL('popup.html'), 'selected': true});
-  chrome.tabs.create({'url': chrome.extension.getURL('login_page.html'), 'selected': true});
+  let ct = checkToken(()=>chrome.tabs.create({'url': chrome.extension.getURL('popup.html'), 'selected': true}), ()=>chrome.tabs.create({'url': chrome.extension.getURL('login_page.html'), 'selected': true}))
 });

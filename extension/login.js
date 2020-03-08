@@ -20,8 +20,6 @@ async function submitFn() {
     isSubmitting = true
     const email = document.querySelector('#email').value
     const pw = document.querySelector('#password').value
-    // TODO: do a post 
-    // submit.value = 'Signing in...'
     document.querySelector('.login-box').innerHTML = `
     <img style="transform: translate(-25%, 10%)" src="loader.gif"></img>
     <h1>Please wait while we process your credentials...</h1>`
@@ -46,7 +44,7 @@ async function submitFn() {
 }
 
 function submitSuccess(auth) {
-    chrome.storage.sync.set({ auth: auth })
+    chrome.storage.sync.set({ auth: auth }, console.log)
     document.querySelector('.login-box').innerHTML = `<h1>You're now logged in. It's safe to close this window.</h1>`
 }
 
