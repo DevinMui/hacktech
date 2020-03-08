@@ -1,4 +1,14 @@
-from flask import Flask, render_template, url_for, request, session, redirect, jsonify, Response
+from flask import (
+    Flask,
+    render_template,
+    url_for,
+    request,
+    session,
+    redirect,
+    jsonify,
+    Response,
+    make_response,
+)
 from db import *
 
 from api import API
@@ -23,11 +33,13 @@ with open("config.json") as json_data_file:
         "SANDBOX",
     )
 
+
 def with_cors(response):
     if type(response) != Response:
         response = jsonify(response)
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add("Access-Control-Allow-Origin", "*")
     return response
+
 
 app = Flask(__name__)
 
@@ -41,9 +53,26 @@ atlas = Atlas(
 )
 
 
+@app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE")
+    return response
+
+
 @app.route("/")
 def index():
-    return "hello"
+    response = jsonify({"email": "email"})
+    # response.headers.set("Access-Control-Allow-Origin", "*")
+    # response.headers.set("Access-Control-Allow-Credentials", "true")
+    # response.headers.set(
+    #     "Access-Control-Allow-Methods", "GET, HEAD, OPTIONS, POST, PUT"
+    # )
+    # response.headers.set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept")
+    # print(response.headers)
+    return response
+    # return with_cors(response)
 
 
 @app.route("/oauth", methods=["GET"])
@@ -55,9 +84,9 @@ def oauth():
     # return user or register
     user = atlas.getUser(ebayUser["individualAccount"]["email"])
     if not user:
-        return with_cors(jsonify(register(ebayUser)))
+        return jsonify(register(ebayUser))
 
-    return with_cors(jsonify(user))
+    return jsonify(user)
 
 
 def register(ebayUser):
@@ -68,18 +97,19 @@ def register(ebayUser):
         + ebayUser["individualAccount"]["lastName"]
     )
     data = {"email": email, "name": name}
-    return with_cors(atlas.createUser(data))
+    return atlas.createUser(data)
 
 
 # store _id
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json(force= True)
+    data = request.get_json(force=True)
     email = data["email"]
     user = atlas.getUser(email)
+
     if not user:
-        return with_cors(jsonify({"error": "error"}))
-    return with_cors(jsonify(user))
+        return jsonify({"error": "error"})
+    return jsonify(user)
 
 
 @app.route("/user", methods=["POST"])
@@ -123,7 +153,7 @@ def create_queue():
 @app.route("/update_order", methods=["POST"])
 def update_order():
     reqData = request.get_json()
-    return (atlas.updateOrder(reqData["_id"], reqData["data"]))
+    return atlas.updateOrder(reqData["_id"], reqData["data"])
 
 
 if __name__ == "__main__":
