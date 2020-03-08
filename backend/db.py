@@ -57,7 +57,7 @@ class Atlas:
 
     # returns the order document with specified id if order exists
     def getOrder(self, _id: str):
-        existing_order = self.order.find({"_id": ObjectId(_id)}).next()
+        existing_order = self.order.find({"_id": _id}).next()
         if existing_order:
             existing_order["_id"] = str(existing_order["_id"])
         return existing_order
