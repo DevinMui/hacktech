@@ -61,7 +61,6 @@ class API:
             except Exception as e:
                 pass
 
-        print("grabbing")
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": f"Basic {self.credential}",
