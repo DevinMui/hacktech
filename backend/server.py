@@ -74,11 +74,11 @@ def register(ebayUser):
 # store _id
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
+    data = request.get_json(force= True)
     email = data["email"]
     user = atlas.getUser(email)
     if not user:
-        return jsonify({"error": "error"})
+        return with_cors(jsonify({"error": "error"}))
     return with_cors(jsonify(user))
 
 
