@@ -112,7 +112,7 @@ def queue():
 @app.route("/start_queue", methods=["POST"])
 def startQueue():
     data = request.get_json()
-    return atlas.startQueue(data["_id"])
+    return atlas.startQueue(data["user_id"], data["queue_id"])
 
 
 @app.route("/stop_queue", methods=["POST"])
