@@ -100,7 +100,7 @@ def user():
 @app.route("/order", methods=["POST"])
 def order():
     reqData = request.get_json()
-    return atlas.getOrder(reqData["_id"])
+    return atlas.findOrder(reqData["itemId"])
 
 
 @app.route("/queue", methods=["POST"])
