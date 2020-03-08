@@ -87,7 +87,7 @@ async function createModal(itemId, email="ebayuser@ebay.com") {
         if(item.start) itemsList.push(item)
     }
     const items = itemsList.map((item) => `
-    <div class="item-row" data=${item._id}>
+    <div class="item-row" data=${item._id} len=${item.orders.length}>
         <h2 class="item-title">${item.name}</h2>
     </div>
     `)
@@ -107,7 +107,7 @@ async function createModal(itemId, email="ebayuser@ebay.com") {
     `
     document.querySelector('.modal').innerHTML = outer
     document.querySelectorAll('.item-row').forEach(i => {
-        i.addEventListener('click', () => addItem(i.attributes.data.value, itemId))
+        i.addEventListener('click', () => addItem(i.attributes.data.value, itemId, i.attributes.len.value))
     })
     document.querySelector('#add-plus').addEventListener('click', () => {
         // grabs value 
@@ -133,7 +133,7 @@ async function removeItem(id) {
     }
 }
 
-function addItem(qId, _id) {
+function addItem(qId, _id, len) {
     chrome.storage.sync.get('auth', 
     (i) => {
         api.post('/enqueue_order', 
@@ -142,6 +142,15 @@ function addItem(qId, _id) {
                 order: {_id}
             })
             .then(r=>r.json())
+            .then(() => {
+                if(len == 0) {
+                    api.post('/start_queue', {
+                        user_id: i.auth,
+                        queue_id: qId
+                    })
+                } 
+                return true
+            })
             .then(() => {$.modal.close(); snackSucc()})
             .catch(snackErr)
     })
