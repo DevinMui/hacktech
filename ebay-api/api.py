@@ -53,12 +53,10 @@ class API:
             try:
                 with open("user.json") as f:
                     data = json.load(f)
-                    self.accessToken = data["access_token"]
-                    self.tokenExpires = datetime.strptime(data["token_expires"], "%c")
-                    self.refreshToken = data["refresh_token"]
-                    self.refreshExpires = datetime.strptime(
-                        data["refresh_expires"], "%c"
-                    )
+                    accessToken = data["access_token"]
+                    tokenExpires = datetime.strptime(data["token_expires"], "%c")
+                    refreshToken = data["refresh_token"]
+                    refreshExpires = datetime.strptime(data["refresh_expires"], "%c")
                     return
             except Exception as e:
                 pass
