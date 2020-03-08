@@ -35,7 +35,7 @@ async function submitFn() {
             return submitFail()
         }
         else {
-            return submitSuccess(r._id)
+            return submitSuccess(r._id, email)
         }
     } catch (e) {
         console.log(e)
@@ -43,9 +43,8 @@ async function submitFn() {
     }
 }
 
-function submitSuccess(auth) {
-    chrome.storage.sync.set({ auth: auth }, console.log)
-    document.querySelector('.login-box').innerHTML = `<h1>You're now logged in. It's safe to close this window.</h1>`
+function submitSuccess(auth, email) {
+    chrome.storage.sync.set({ auth: auth, email: email }, () => document.querySelector('.login-box').innerHTML = `<h1>You're now logged in. It's safe to close this window.</h1>`)
 }
 
 function submitFail() {

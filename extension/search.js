@@ -84,7 +84,7 @@ async function createModal(itemId, email="ebayuser@ebay.com") {
     let itemsList = []
     for(let i = 0; i < groups.length; i++) {
         let item = await getGroupItems(groups[i])
-        itemsList.push(item)
+        if(item.start) itemsList.push(item)
     }
     const items = itemsList.map((item) => `
     <div class="item-row" data=${item._id}>
@@ -153,6 +153,7 @@ function reload() {
 }
 
 function snackSucc(e) {
+    // start queue
     let w = window.location.reload.bind(window)
     Snackbar.show({ 
         text: 'Successfully added group!', 
@@ -163,7 +164,6 @@ function snackSucc(e) {
 
 function snackErr(e) {
     if(e) return    Snackbar.show({ text: e, pos:'bottom_center' });
-
     Snackbar.show({ text: 'Please try again later :(' });
 }
 
@@ -171,7 +171,8 @@ async function newGroup(name, maxBid, itemId) { // creates a new group
     maxBid = Number.parseFloat(maxBid)
     if(!maxBid) return Snackbar.show({ text: 'Please enter a valid bid' })
     chrome.storage.sync.get(auth, (a) => {
-        api.post('/create_queue', {_id: a.auth, data: {max_bid: maxBid, name: name}})
+        let r = await api.post('/create_queue', {_id: a.auth, data: {max_bid: maxBid, name: name}})
+        r = r.json()
         createModal(itemId)
     })
 }
