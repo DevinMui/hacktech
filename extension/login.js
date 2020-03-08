@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 const h = `<h1 style="margin-bottom: 2rem;">Login</h1>
 <div class="textbox">
     <input id="email" type="text" style="width: 100%;" placeholder="Email" name="" value="ebayuser@ebay.com">
@@ -15,13 +15,6 @@ submit.addEventListener('click', submitFn)
 
 let isSubmitting = false
 
-
-=======
-let api = new Api()
-const submit = document.querySelector('#submit-btn')
-let isSubmitting = false
-submit.addEventListener('click', submitFn)
->>>>>>> 2379127b86a133a34a31c1b8f4051a8316e74352
 async function submitFn() {
     if (isSubmitting) return
     isSubmitting = true
@@ -54,29 +47,14 @@ async function submitFn() {
 
 function submitSuccess(auth) {
     chrome.storage.sync.set({ auth: auth })
-<<<<<<< HEAD
     document.querySelector('.login-box').innerHTML = `<h1>You're now logged in. It's safe to close this window.</h1>`
-
-=======
-    window.close()
->>>>>>> 2379127b86a133a34a31c1b8f4051a8316e74352
 }
 
 function submitFail() {
     submit.value = 'Sign in'
     isSubmitting = false
-<<<<<<< HEAD
     document.querySelector('.login-box').innerHTML = h
     submit = document.querySelector('#submit-btn')
     submit.addEventListener('click', submitFn)
     Snackbar.show({ text: 'Incorrect credentials', showAction: false, pos: 'bottom-center' });
 }
-=======
-    Snackbar.show({
-        text: 'Incorrect credentials',
-        showAction: false,
-        pos: 'bottom-center'
-    })
-}
-
->>>>>>> 2379127b86a133a34a31c1b8f4051a8316e74352
