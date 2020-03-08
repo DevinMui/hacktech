@@ -16,12 +16,15 @@ class API:
         redirectName: str,
         scope: list,
         env: str = "SANDBOX",
+        saveToJSON: bool = False,
     ):
         self.appId = appId
         self.certId = certId
         self.credential = b64encode((appId + ":" + certId).encode()).decode("utf-8")
         self.redirectName = redirectName
         self.scope = " ".join(scope)
+        self.saveToJSON = saveToJSON
+        self.env = env
         self.url = (
             "https://api.sandbox.ebay.com"
             if env is "SANDBOX"
@@ -46,17 +49,15 @@ class API:
 
     # function gets the user oauth token
     # option to save the token to a json file to reduce # api requests
-    def getUserAccessToken(self, code: str, saveToJSON=True):
-        if saveToJSON:
+    def getUserAccessToken(self, code: str):
+        if self.saveToJSON:
             try:
                 with open("user.json") as f:
                     data = json.load(f)
-                    self.accessToken = data["access_token"]
-                    self.tokenExpires = datetime.strptime(data["token_expires"], "%c")
-                    self.refreshToken = data["refresh_token"]
-                    self.refreshExpires = datetime.strptime(
-                        data["refresh_expires"], "%c"
-                    )
+                    accessToken = data["access_token"]
+                    tokenExpires = datetime.strptime(data["token_expires"], "%c")
+                    refreshToken = data["refresh_token"]
+                    refreshExpires = datetime.strptime(data["refresh_expires"], "%c")
                     return
             except Exception as e:
                 pass
@@ -74,46 +75,96 @@ class API:
             tokenObj.raise_for_status()
 
         token = tokenObj.json()
-        self.accessToken = token["access_token"]
-        self.tokenExpires = now + timedelta(seconds=token["expires_in"])
-        self.refreshToken = token["refresh_token"]
-        self.refreshExpires = now + timedelta(seconds=token["refresh_token_expires_in"])
-        if saveToJSON:
-            data = {
-                "access_token": self.accessToken,
-                "token_expires": self.tokenExpires.strftime("%c"),
-                "refresh_token": self.refreshToken,
-                "refresh_expires": self.refreshExpires.strftime("%c"),
-            }
+        accessToken = token["access_token"]
+        tokenExpires = now + timedelta(seconds=token["expires_in"])
+        refreshToken = token["refresh_token"]
+        refreshExpires = now + timedelta(seconds=token["refresh_token_expires_in"])
+        data = {
+            "accessToken": accessToken,
+            "tokenExpires": tokenExpires.strftime("%c"),
+            "refreshToken": refreshToken,
+            "refreshExpires": refreshExpires.strftime("%c"),
+        }
+        if self.saveToJSON:
             with open("user.json", "w") as f:
                 json.dump(data, f)
+        return data
 
-    def _refreshAccessToken(self):
+    def _refreshAccessToken(self, token: dict):
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Authorization": f"Basic {self.credential}",
         }
-        body = f"grant_type=refresh_token&refresh_token={self.refreshToken}&scope={self.scope}"
+        body = f"grant_type=refresh_token&refresh_token={token['refreshToken']}&scope={self.scope}"
 
-        tokenObj = post(self.url, data=body, headers=headers)
+        tokenObj = post(
+            self.url + "/identity/v1/oauth2/token", data=body, headers=headers
+        )
         now = datetime.now()
         if not tokenObj.ok:
             tokenObj.raise_for_status()
 
         token = tokenObj.json()
-        self.accessToken = token["access_token"]
-        self.tokenExpires = now + timedelta(seconds=token["expires_in"])
+        accessToken = token["access_token"]
+        tokenExpires = now + timedelta(seconds=token["expires_in"])
+        data = {
+            "accessToken": accessToken,
+            "tokenExpires": tokenExpires.strftime("%c"),
+            "refreshToken": token["refreshToken"],
+            "refreshExpires": token["refreshExpires"],
+        }
+        if self.saveToJSON:
+            with open("user.json", "w") as f:
+                json.dump(data, f)
+        return data
+
+    def getUser(self, token: dict = None):
+        refreshExpires = datetime.strptime(token["refreshExpires"], "%c")
+        tokenExpires = datetime.strptime(token["tokenExpires"], "%c")
+        accessToken = token["accessToken"]
+        refreshToken = token["refreshToken"]
+        if datetime.now() > refreshExpires:
+            raise AuthException("Auth and refresh expired. Please login.")
+        elif datetime.now() > tokenExpires:
+            self._refreshAccessToken(token)
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {accessToken}",
+            "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
+        }
+
+        res = (
+            get(
+                "https://apiz.sandbox.ebay.com/commerce/identity/v1/user",
+                headers=headers,
+            )
+            if self.env == "SANDBOX"
+            else get("https://apiz.ebay.com/commerce/identity/v1/user", headers=headers)
+        )
+
+        if not res.ok:
+            print(res.text)
+            res.raise_for_status()
+
+        return res.json()
 
     # authenticated get/post requests
-    def get(self, uri: str, query: list = None, headers: dict = None):
-        if datetime.now() > self.refreshExpires:
+    def get(
+        self, uri: str, query: list = None, token: dict = None, headers: dict = None
+    ):
+        refreshExpires = datetime.strptime(token["refreshExpires"], "%c")
+        tokenExpires = datetime.strptime(token["tokenExpires"], "%c")
+        accessToken = token["accessToken"]
+        refreshToken = token["refreshToken"]
+        if datetime.now() > refreshExpires:
             raise AuthException("Auth and refresh expired. Please login.")
-        elif datetime.now() > self.tokenExpires:
-            self._refreshAccessToken()
+        elif datetime.now() > tokenExpires:
+            self._refreshAccessToken(token)
 
         reqHeaders = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.accessToken}",
+            "Authorization": f"Bearer {accessToken}",
             "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
         }
         if headers is not None:
@@ -132,15 +183,19 @@ class API:
 
         return res.json()
 
-    def post(self, uri: str, body: dict = {}, headers: dict = None):
-        if datetime.now() > self.refreshExpires:
+    def post(self, uri: str, body: dict = {}, token: dict = None, headers: dict = None):
+        refreshExpires = token["refreshExpires"].strptime("%c")
+        tokenExpires = token["tokenExpires"].strptime("%c")
+        accessToken = token["accessToken"]
+        refreshToken = token["refreshToken"]
+        if datetime.now() > refreshExpires:
             raise AuthException("Auth and refresh expired. Please login.")
-        elif datetime.now() > self.tokenExpires:
-            self._refreshAccessToken()
+        elif datetime.now() > tokenExpires:
+            self._refreshAccessToken(token)
 
         reqHeaders = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.accessToken}",
+            "Authorization": f"Bearer {accessToken}",
             "X-EBAY-C-MARKETPLACE-ID": "EBAY_US",
         }
         if headers is not None:

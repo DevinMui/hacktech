@@ -34,25 +34,16 @@ atlas = Atlas(
     + "1234>@cluster0-u93bv.azure.mongodb.net/test?retryWrites=true&w=majority"
 )
 
-# takes login information in json format and checks if user exists in db
-# @app.route("/login", methods=["POST"])
-# def login():
-#     reqData = request.get_json()
-#     if reqData is None:
-#         return "No request data"
-#     loginUser = atlas.getUser(reqData["email"])
-#     if reqData["password"] == loginUser["password"]:
-#         session["email"] = reqData["email"]
-#         return loginUser
-#     return "Invalid email/password combination"
-
 
 @app.route("/oauth", methods=["GET"])
 def login():
     code = request.args.get("code")
-    api.getUserAccessToken(code)
+    token = api.getUserAccessToken(code)
+    user = api.getUser(token)
+    # check user email against db
+    # return user or register
 
-    return jsonify({"token": api.accessToken})
+    return jsonify(user)
 
 
 # takes register data and creates a user document in db cluster of the user's info
