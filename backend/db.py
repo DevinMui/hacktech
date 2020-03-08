@@ -97,7 +97,7 @@ class Atlas:
         return order
 
     def updateOrder(self, _id: str, data: dict):
-        existing_order = self.user.find({"_id": ObjectId(_id)}).next()
+        existing_order = self.order.find({"_id": ObjectId(_id)}).next()
         if existing_order is None:
             raise BadDataException("error: order does not exist")
         self.order.replaceOne({"_id": ObjectId(_id)}, data)
@@ -120,12 +120,13 @@ class Atlas:
         queue["_id"] = str(queue["_id"])
         return queue
 
-    def startQueue(self, _id: str):
-        queue = findQueue(_id)
+    def startQueue(self, user_id: str, queue_id: str):
+        user = self.user.find({"_id": ObjectId(user_id)}).next()
+        queue = findQueue(queue_id)
         queue["start"] = True
-        queue = self.queue.replaceOne({"_id": ObjectId(_id)}, queue)
+        queue = self.queue.replaceOne({"_id": ObjectId(queue_id)}, queue)
         # start thread
-        thread.startThread(_id)
+        thread.startThread(self, user, queue_id)
         return queue
 
     def stopQueue(self, _id: str):
