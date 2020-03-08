@@ -29,11 +29,12 @@ class Atlas:
         # sanitize bad input
         data["queues"] = []
         user = self.user.insert(data)
-        return self.user.find_one({"_id": user})
+        user = self.user.find({"_id": user}).next()
+        return user
 
     # prob dont need
     def updateUser(self, _id: str, attributToUpdate, newValue):
-        existing_user = self.user.find_one({"_id": ObjectId(_id)})
+        existing_user = self.user.find({"_id": ObjectId(_id)}).next()
         # check if user exists
         if existing_user:
             return self.user.update(
@@ -51,14 +52,14 @@ class Atlas:
 
     # returns the order document with specified id if order exists
     def getOrder(self, _id: str):
-        existing_order = self.order.find_one({"_id": ObjectId(_id)})
+        existing_order = self.order.find({"_id": ObjectId(_id)}).next()
         if not existing_order:
             raise BadDataException("Not Found")
         return existing_order
 
     # returns the queue document with specified id if queue exists
     def getQueue(self, _id: str):
-        existing_queue = self.queue.find_one({"_id": ObjectId(_id)})
+        existing_queue = self.queue.find({"_id": ObjectId(_id)}).next()
         if not existing_queue:
             raise BadDataException("Not Found")
         return existing_queue
@@ -66,7 +67,7 @@ class Atlas:
     # prob dont need
     # removes user with specified user name
     def removeUser(self, _id: str):
-        existing_user = self.user.find_one({"_id": ObjectId(_id)})
+        existing_user = self.user.find({"_id": ObjectId(_id)}).next()
         if not existing_user:
             raise BadDataException("Not Found")
 
@@ -76,7 +77,7 @@ class Atlas:
         return existing_user
 
     def findOrder(self, _id: str):
-        order = self.order.find_one(ObjectId(_id))
+        order = self.order.find(ObjectId(_id)).next()
         if not order:
             raise BadDataException("Order not found")
         return order
@@ -92,7 +93,7 @@ class Atlas:
         return order
 
     def updateOrder(self, _id: str, data: dict):
-        existing_order = self.user.find_one({"_id": ObjectId(_id)})
+        existing_order = self.user.find({"_id": ObjectId(_id)}).next()
         if existing_order is None:
             raise BadDataException("error: order does not exist")
         self.order.replaceOne({"_id": ObjectId(_id)}, data)
@@ -107,7 +108,7 @@ class Atlas:
         return existing_order
 
     def findQueue(self, _id: str):
-        queue = self.queue.find_one(ObjectId(_id))
+        queue = self.queue.find(ObjectId(_id)).next()
         if not queue:
             raise BadDataException("Queue not found")
         return queue
@@ -115,7 +116,7 @@ class Atlas:
     # creates a queue for a specific user with queue_data in json format
     def createQueue(self, _id: str, data: dict):
         # checks if user exists and queue does not exist yet
-        existing_user = self.user.find_one({"_id": ObjectId(_id)})
+        existing_user = self.user.find({"_id": ObjectId(_id)}).next()
         if not existing_user:
             raise BadDataException("User not found")
 
@@ -132,7 +133,7 @@ class Atlas:
 
     # dequeues an order from the queue assuming the queue is sorted
     def dequeue(self, _id):
-        existing_queue = self.queue.find_one({"_id": ObjectId(_id)})
+        existing_queue = self.queue.find({"_id": ObjectId(_id)}).next()
         if not existing_queue:
             raise BadDataException("Queue not found")
 
@@ -153,7 +154,7 @@ class Atlas:
 
     # enqueues a order of specified information into specific queue
     def enqueue(self, _id: str, order: dict):
-        existing_queue = self.queue.find_one({"_id": ObjectId(_id)})
+        existing_queue = self.queue.find({"_id": ObjectId(_id)}).next()
         if not existing_queue:
             raise BadDataException("Queue not found")
         existing_queue["orders"].append(order["_id"])
@@ -165,10 +166,10 @@ class Atlas:
 
     # deletes a specific queue from specific user
     def deleteQueue(self, userId: str, queueId: str):
-        existing_user = self.user.find_one({"_id": ObjectId(userId)})
+        existing_user = self.user.find({"_id": ObjectId(userId)}).next()
         if not existing_user:
             raise BadDataException("User not found")
-        existing_queue = self.queue.find_one({"_id": ObjectId(queueId)})
+        existing_queue = self.queue.find({"_id": ObjectId(queueId)}).next()
         if not existing_queue:
             raise BadDataException("Queue not found")
 

@@ -79,6 +79,9 @@ function getGroupItems(group) {
 }
 
 function createModal(itemId) {
+    // if auth fails...
+    if(!checkToken()) securityFail()
+
     // grabs groups (AJAX)
     let groups = [
         { _id: "1" },
@@ -152,4 +155,13 @@ function snackErr(e) {
 async function newGroup(name, itemId) {
     // TODO: reates a new group with one item in it
 
+}
+
+function checkToken() {
+    if(!chrome.storage.sync.get('auth')) return false
+    return true
+}
+
+function securityFail() {
+    chrome.runtime.sendMessage({message: "security fail"}, console.log);
 }
